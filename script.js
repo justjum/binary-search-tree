@@ -105,18 +105,22 @@ class BST {
     }
   }
 
-  find(value, root) {
+  find(value, root, node) {
     if (root === null) {
       return;
     }
     if (root.value === value) {
       console.log(`Found ${value}`);
-      return console.log(root);
+      node = root;
+      return node;
     }
-
-    value < root.value
-      ? this.find(value, root.left)
-      : this.find(value, root.right);
+    else {
+      console.log(`node ${node}`);
+      value < root.value
+      ? node = this.find(value, root.left, node)
+      : node = this.find(value, root.right, node);
+      return node;
+    }
   }
 
   levelOrder(root, queue = [root], levelOrderList = []) {
@@ -134,7 +138,67 @@ class BST {
         queue.shift(1);
         return this.levelOrder(queue[0], queue, levelOrderList);
     }
+  }
 
+  preOrder(root, array=[]) {
+      if (root === null) {
+        return array;
+      }
+      else {
+        //console.log(root.value);
+        array.push(root.value);
+        this.preOrder(root.left, array);
+        this.preOrder(root.right, array)
+        return array;
+      } 
+  }
+
+  inOrder(root, array=[]) {
+    if (root === null) {
+      return array;
+    }
+    else {
+      this.inOrder(root.left, array);
+      //console.log(root.value);
+      array.push(root.value);
+      this.inOrder(root.right, array);
+      return array;
+    }
+  }
+
+  postOrder(root, array=[]) {
+    if (root === null) {
+      return array;
+    }
+    else {
+      this.postOrder(root.left, array);
+      this.postOrder(root.right, array);
+      //console.log(root.value);
+      array.push(root.value);
+      return array;
+    }
+  }
+
+  height(value, root) {
+    let foundNode = this.find(value, root);
+    let hLeft = 0;
+    let hRight = 0;
+    if (foundNode.left === null && foundNode.right === null) {
+      return console.log('Height = 0');
+    }
+    else {
+      checkHeight(foundNode, hLeft, hRight);
+    }
+/*     while (foundNode.left) {
+      hLeft++;
+      foundNode = foundNode.left;
+    }
+    while (foundNode.right) {
+      hRight++;
+      foundNode = foundNode.right 
+    }
+    console.log(hLeft)
+    console.log(hRight); */
   }
 
   depth(value, root, depth = -1) {
@@ -191,6 +255,21 @@ function treeRecursive(array) {
   }
 }
 
+function checkHeight(node, hLeft, hRight) {
+  if (node === null) {
+    return;
+  }
+  else {
+    console.log('left')
+    checkHeight(node.left, hLeft, hRight);
+    console.log('right')
+    checkHeight(node.right, hLeft, hRight);
+    return 
+  }
+  console.log(lHeight)
+}
+
+
 // prettyPrint function from TOP (only works with perfectly balanced trees)
 const prettyPrint = (node, prefix = "", isLeft = true) => {
   if (node === null) {
@@ -237,8 +316,16 @@ prettyPrint(tree.root);
 //tree.delete(67, tree.root);
 tree.delete(5, tree.root);
 prettyPrint(tree.root);
-tree.depth(6345, tree.root);
-tree.levelOrder(tree.root);
+//tree.depth(6345, tree.root);
+//tree.levelOrder(tree.root);
+let inList = tree.inOrder(tree.root);
+console.log(inList)
+let preList = tree.preOrder(tree.root);
+console.log(preList);
+let postList = tree.postOrder(tree.root);
+console.log(postList);
+tree.height(324, tree.root);
+
 
 // Had all of the below mess in the 'delete' method until figuring out the mystery
 // of 'inorder' and adding the 'deleteNode' method.
