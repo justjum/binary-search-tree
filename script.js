@@ -18,14 +18,14 @@ class BST {
     //console.log(`root ${root.value}`)
     //console.log(`value ${value}`)
     if (value === root.value) {
-      console.log("already in list");
+      console.log(`Node ${value} already in list`);
       return;
     }
     if (value < root.value && root.left === null) {
-      console.log(`inserting ${value}`);
+      console.log(`Inserting Node ${value}`);
       return (root.left = new Node(value));
     } else if (value > root.value && root.right === null) {
-      console.log(`inserting ${value}`);
+      console.log(`Inserting Node ${value}`);
       return (root.right = new Node(value));
     } else {
       value < root.value
@@ -36,91 +36,123 @@ class BST {
   }
 
   delete(value, root) {
-
-    try {
-        if (value === root.left.value) {
-            console.log(`removing ${value}`);
-            console.log(root);
-            if (root.left.left === null && root.left.right === null) {
-              return root.left = null;
-            }
-            else if (root.left.left === null) {
-                console.log('left null');
-                root.left = root.left.right;
-            }
-            else if (root.left.right === null) {
-                console.log('right null');
-                root.left = root.left.left;
-            }
-            else {
-                console.log(root);
-                this.inorder(root.right);
-                
-                let tempLeft = root.left.left;
-                let tempRight = root.left.right;
-                root.left = tempLeft;
-                root.left.right = tempRight;
-            }
-          }
-    }
-    catch {}
-
-    try {
-        if (value === root.right.value) {
-            console.log(`removing ${value}`);
-            console.log(root);
-            if (root.right.left === null && root.right.right === null) {
-                return root.right = null;
-            }
-            else if (root.right.left === null) {
-                root.right = root.right.right;
-            }
-            else if (root.right.right === null) {
-                root.right = root.right.left;
-            }
-            else {
-                console.log(root);
-                this.inorder(root.right);
-                tempLeft = root.right.left;
-                tempRight = root.right.right;
-            }
-            
-        }
-    }
-    catch{}
-
     if (root === null) {
-
       return root;
     }
-    else {
+
+    if (value === root.value && root.right !== null && root.left !== null) {
+      let inOrder = this.inorder(root.right, value);
+      let tempLeft = root.left;
+      let tempRight = root.right;
+      console.log(`Replacing Node ${value} with ${inOrder}`);
+      this.deleteNode(root.right, inOrder);
+      root.value = inOrder;
+      root.left = tempLeft;
+      root.right = tempRight;
+    } else if (value === root.value && root.left !== null) {
+      root.value = root.left.value;
+      root.left = null;
+    } else if (value === root.value && root.right !== null) {
+      root.value = root.right.value;
+      root.right = null;
+    } else if (value === root.value) {
+      this.deleteNode(this.root, value);
+      return null;
+    } else {
       value < root.value
         ? this.delete(value, root.left)
         : this.delete(value, root.right);
     }
-    if (value !== root.value) {
+    /*     if (value !== root.value) {
       return console.log(`Value ${value} not found`);
-    }
-    if (value === root.value) {
-        let inOrder = this.inorder(root.right);
-        let tempLeft = root.left;
-        let tempRight = root.right;
-        this.delete(inOrder, tree.root);
-        root.value = inOrder;
-        root.left = tempLeft;
-        root.right = tempRight;
-        
+    } */
+  }
+
+  // this method created to find a "swap" for values at lower levels of tree
+  inorder(root, value) {
+    if (root.left) {
+      if (root.left.value === value) {
+        return root;
+      }
+      let left = root.left;
+      while (left.left) {
+        return this.inorder(left, value);
+      }
+      return left.value;
     }
   }
 
-  inorder(root) {
-    let left = root.left;
-    while (left.left) {
-        return this.inorder(left);
+  // needed to crete this method to remove leaf nodes (left/right=null)
+  deleteNode(root, value) {
+    if (root === null) {
+      return;
     }
-    
-    return left.value;
+    if (root.left !== null) {
+      if (root.left.value === value) {
+        console.log(`Deleting Node ${value}`);
+        root.left = null;
+      } else {
+        this.deleteNode(root.left, value);
+      }
+    }
+    if (root.right !== null) {
+      if (root.right.value === value) {
+        console.log(`Deleting Node ${value}`);
+        root.right = null;
+      } else {
+        this.deleteNode(root.right, value);
+      }
+    }
   }
+
+  find(value, root) {
+    if (root === null) {
+      return;
+    }
+    if (root.value === value) {
+      console.log(`Found ${value}`);
+      return console.log(root);
+    }
+
+    value < root.value
+      ? this.find(value, root.left)
+      : this.find(value, root.right);
+  }
+
+  levelOrder(root, queue = [root], levelOrderList = []) {
+    if (queue.length === 0) {
+      return levelOrderList;
+    }
+    if (queue[0] === null) {
+      queue.shift(1);
+      this.levelOrder(queue[0], queue, levelOrderList);
+    }
+    else {
+        console.log(queue[0].value);
+        levelOrderList.push(queue[0].value);
+        queue.push(queue[0].left, queue[0].right);
+        queue.shift(1);
+        return this.levelOrder(queue[0], queue, levelOrderList);
+    }
+
+  }
+
+  depth(value, root, depth = -1) {
+    depth++;
+    if (root === null) {
+      return;
+    }
+    if (root.value === value) {
+      console.log(`Found ${value} at depth ${depth}`);
+      return console.log(root);
+    }
+
+    value < root.value
+      ? this.depth(value, root.left, depth)
+      : this.depth(value, root.right, depth);
+    
+  }
+
 }
 
 function buildTree(array) {
@@ -192,12 +224,73 @@ tree.insert(47, tree.root);
 //console.log(tree);
 //prettyPrint(tree.root);
 tree.delete(480, tree.root);
-tree.delete(47, tree.root);
 prettyPrint(tree.root);
 tree.insert(47, tree.root);
 prettyPrint(tree.root);
 tree.delete(48, tree.root);
+prettyPrint(tree.root);
 tree.delete(23, tree.root);
 tree.delete(12, tree.root);
-tree.delete(324, tree.root);
+//prettyPrint(tree.root);
+//tree.insert(52, tree.root);
 prettyPrint(tree.root);
+//tree.delete(67, tree.root);
+tree.delete(5, tree.root);
+prettyPrint(tree.root);
+tree.depth(6345, tree.root);
+tree.levelOrder(tree.root);
+
+// Had all of the below mess in the 'delete' method until figuring out the mystery
+// of 'inorder' and adding the 'deleteNode' method.
+
+/* try {
+        if (value === root.left.value) {
+            console.log(`removing ${value}`);
+            console.log(root);
+            if (root.left.left === null && root.left.right === null) {
+              return root.left = null;
+            }
+            else if (root.left.left === null) {
+                console.log('left null');
+                root.left = root.left.right;
+            }
+            else if (root.left.right === null) {
+                console.log('right null');
+                root.left = root.left.left;
+            }
+            else {
+                console.log(root);
+                this.inorder(root.right);
+                
+                let tempLeft = root.left.left;
+                let tempRight = root.left.right;
+                root.left = tempLeft;
+                root.left.right = tempRight;
+            }
+          }
+    }
+    catch {}
+
+    try {
+        if (value === root.right.value) {
+            console.log(`removing ${value}`);
+            console.log(root);
+            if (root.right.left === null && root.right.right === null) {
+                return root.right = null;
+            }
+            else if (root.right.left === null) {
+                root.right = root.right.right;
+            }
+            else if (root.right.right === null) {
+                root.right = root.right.left;
+            }
+            else {
+                console.log(root);
+                this.inorder(root.right);
+                tempLeft = root.right.left;
+                tempRight = root.right.right;
+            }
+            
+        }
+    }
+    catch{} */
