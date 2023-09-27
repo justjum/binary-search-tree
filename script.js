@@ -1,3 +1,5 @@
+
+// node class to for linking balanced search tree of nodes
 class Node {
   constructor(value = null, left = null, right = null) {
     this.value = value;
@@ -6,11 +8,14 @@ class Node {
   }
 }
 
+
+// balanced search tree class with alteration/search/ordering
 class BST {
   constructor(root) {
     this.root = root;
   }
 
+  // check for presence of value, add if necessary
   insert(value, root) {
     if (root === null) {
       return;
@@ -39,7 +44,7 @@ class BST {
     if (root === null) {
       return root;
     }
-
+    // delete using 'inorder' number as swap case
     if (value === root.value && root.right !== null && root.left !== null) {
       let inOrder = this.inorder(root.right, value);
       let tempLeft = root.left;
@@ -49,7 +54,9 @@ class BST {
       root.value = inOrder;
       root.left = tempLeft;
       root.right = tempRight;
-    } else if (value === root.value && root.left !== null) {
+    }
+    // delete lower leaves with replacement of value
+    else if (value === root.value && root.left !== null) {
       root.value = root.left.value;
       root.left = null;
     } else if (value === root.value && root.right !== null) {
@@ -113,16 +120,16 @@ class BST {
       console.log(`Found ${value}`);
       node = root;
       return node;
-    }
-    else {
-      console.log(`node ${node}`);
+    } else {
+      //console.log(`node ${node}`);
       value < root.value
-      ? node = this.find(value, root.left, node)
-      : node = this.find(value, root.right, node);
+        ? (node = this.find(value, root.left, node))
+        : (node = this.find(value, root.right, node));
       return node;
     }
   }
 
+  // function using array as queue to process nodes in level order
   levelOrder(root, queue = [root], levelOrderList = []) {
     if (queue.length === 0) {
       return levelOrderList;
@@ -130,34 +137,32 @@ class BST {
     if (queue[0] === null) {
       queue.shift(1);
       this.levelOrder(queue[0], queue, levelOrderList);
-    }
-    else {
-        console.log(queue[0].value);
-        levelOrderList.push(queue[0].value);
-        queue.push(queue[0].left, queue[0].right);
-        queue.shift(1);
-        return this.levelOrder(queue[0], queue, levelOrderList);
+    } else {
+      //console.log(queue);
+      levelOrderList.push(queue[0].value);
+      queue.push(queue[0].left, queue[0].right);
+      queue.shift(1);
+      this.levelOrder(queue[0], queue, levelOrderList);
+      return levelOrderList;
     }
   }
 
-  preOrder(root, array=[]) {
-      if (root === null) {
-        return array;
-      }
-      else {
-        //console.log(root.value);
-        array.push(root.value);
-        this.preOrder(root.left, array);
-        this.preOrder(root.right, array)
-        return array;
-      } 
-  }
-
-  inOrder(root, array=[]) {
+  preOrder(root, array = []) {
     if (root === null) {
       return array;
+    } else {
+      //console.log(root.value);
+      array.push(root.value);
+      this.preOrder(root.left, array);
+      this.preOrder(root.right, array);
+      return array;
     }
-    else {
+  }
+
+  inOrder(root, array = []) {
+    if (root === null) {
+      return array;
+    } else {
       this.inOrder(root.left, array);
       //console.log(root.value);
       array.push(root.value);
@@ -166,11 +171,10 @@ class BST {
     }
   }
 
-  postOrder(root, array=[]) {
-    if (root === null) {
+  postOrder(root, array = []) {
+    if (root === null || root === undefined) {
       return array;
-    }
-    else {
+    } else {
       this.postOrder(root.left, array);
       this.postOrder(root.right, array);
       //console.log(root.value);
@@ -181,15 +185,16 @@ class BST {
 
   height(value, root) {
     let foundNode = this.find(value, root);
-    let hLeft = 0;
-    let hRight = 0;
     if (foundNode.left === null && foundNode.right === null) {
-      return console.log('Height = 0');
+      return console.log(`Value ${value} height is 0`);
+    } else {
+      const heights = checkHeight(foundNode);
+      console.log(heights);
+      let max = Math.max(...heights);
+      return console.log(`Value ${value} height is ${max}`);
     }
-    else {
-      checkHeight(foundNode, hLeft, hRight);
-    }
-/*     while (foundNode.left) {
+    // Removed the below to run the 'height' check as a seperate recursive
+    /*     while (foundNode.left) {
       hLeft++;
       foundNode = foundNode.left;
     }
@@ -214,9 +219,25 @@ class BST {
     value < root.value
       ? this.depth(value, root.left, depth)
       : this.depth(value, root.right, depth);
-    
   }
 
+  // check balance through comparison of traversal height from root
+  isBalanced(root) {
+    const heights = checkHeight(root);
+    console.log(heights);
+    let minHeight = Math.min(...heights);
+    let maxHeight = Math.max(...heights);
+    maxHeight - minHeight > 1
+      ? console.log("Tree is unbalanced")
+      : console.log("Tree is balanced");
+  }
+
+  // fetch inorder and return new tree 
+  reBalance(root) {
+    let values = this.inOrder(root);
+    console.log(values);
+    return (this.root = buildTree(values));
+  }
 }
 
 function buildTree(array) {
@@ -228,22 +249,23 @@ function buildTree(array) {
   const arrReady = arrNum.filter((num, index) => array.indexOf(num) === index);
   console.log(arrReady);
   let root = treeRecursive(arrReady);
-  console.log(root);
+  console.log(` Root ${root.value}`);
   return (this.root = root);
 }
 
+// Recursively return new Nodes down tree.
 function treeRecursive(array) {
-  if (array.length <= 3) {
+  if (array.length <= 2) {
     if (array.length === 1) {
       //console.log(`base ${array[0]}`);
       return new Node(array[0]);
     } else if (array.length === 2) {
       //console.log(`base ${array[1]},${array[0]}`);
-      return new Node(array[1], array[0]);
-    } else if (array.length === 3) {
-      //console.log(`base ${array[1]}, ${array[0]}, ${array[2]}`);
+      return new Node(array[1], new Node(array[0]));
+    } /* else if (array.length === 3) {
+      console.log(`base ${array[1]}, ${array[0]}, ${array[2]}`);
       return new Node(array[1], new Node(array[0]), new Node(array[2]));
-    }
+    } */
   } else {
     let middle = Math.floor(array.length / 2);
     let root = array.splice(middle);
@@ -255,24 +277,29 @@ function treeRecursive(array) {
   }
 }
 
-function checkHeight(node, hLeft, hRight) {
+// function to create array of all possible 'heights' from starting node
+function checkHeight(node, height = -1, arr = []) {
   if (node === null) {
-    return;
+    arr.push(height);
+    return arr;
+  } else {
+    height++;
+    if (node) {
+      checkHeight(node.left, height, arr);
+    }
+    if (node) {
+      checkHeight(node.right, height, arr);
+    }
+
+    height = 0;
+    return arr;
   }
-  else {
-    console.log('left')
-    checkHeight(node.left, hLeft, hRight);
-    console.log('right')
-    checkHeight(node.right, hLeft, hRight);
-    return 
-  }
-  console.log(lHeight)
 }
 
-
 // prettyPrint function from TOP (only works with perfectly balanced trees)
+// needed to add 'undefined' whilst debugging the recursive build function
 const prettyPrint = (node, prefix = "", isLeft = true) => {
-  if (node === null) {
+  if (node === null || node === undefined) {
     return;
   }
   if (node.right !== null) {
@@ -284,48 +311,98 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
   }
 };
 
+// *** Driver script as per TOP assignment ***
+// - random number of integers <100
+// - check for balanced tree
+// - add multiple integers > 100
+// - check for unbalanced tree
+// - rebalance tree
+// - check for balanced tree
+
+function treeScript(numValues) {
+  const arr = randomArray(numValues);
+  let tree = new BST(buildTree(arr));
+  prettyPrint(tree.root);
+  tree.isBalanced(tree.root);
+  console.log(`Tree level order ${tree.levelOrder(tree.root)}`);
+  console.log(`Tree preorder ${tree.preOrder(tree.root)}`);
+  console.log(`Tree postorder ${tree.postOrder(tree.root)}`);
+  console.log(`Tree inorder ${tree.inOrder(tree.root)}`);
+  tree.insert(148, tree.root);
+  tree.insert(432, tree.root);
+  tree.insert(1039, tree.root);
+  tree.insert(15678, tree.root);
+  prettyPrint(tree.root);
+  tree.isBalanced(tree.root);
+  let newTree = tree.reBalance(tree.root);
+  tree.isBalanced(newTree.root);
+  prettyPrint(tree.root);
+  console.log(`Tree level order ${tree.levelOrder(tree.root)}`);
+  console.log(`Tree preorder ${tree.preOrder(tree.root)}`);
+  console.log(`Tree postorder ${tree.postOrder(tree.root)}`);
+  console.log(`Tree inorder ${tree.inOrder(tree.root)}`);
+}
+
+// function to produce an array of random numbers 0-99
+function randomArray(numValues, arr = []) {
+  for (let x = 0; x < numValues; x++) {
+    arr.push(Math.floor(Math.random() * 100));
+    //console.log(arr);
+  }
+  return arr;
+}
+
+// function to run treescript with randomly sized array
+treeScript(Math.floor(Math.random() * 30) + 1);
+
+//let tree = new BST(buildTree([48, 23, 12, 87, 56, 1, 6, 99, 5, 14, 78, 43, 3, 66, 41]));
+
+// *** Testing of Functions throughout build ***
+
 //buildTree([1, 7, 4, 23, 8, 9, 4, 3, 64, 5, 7, 9, 67, 6345, 324, 10345])
 //buildTree([3,4,5])
 
-let tree = new BST(
+/* let tree = new BST(
   buildTree([
     1, 7, 4, 23, 8, 9, 11111, 12, 4, 3, 64, 5, 7, 9, 67, 6345, 324, 10345,
   ])
-);
+); */
 //let tree2 = new BST(buildTree([1, 7, 4, 23, 5, 7, 14, 9, 67, 6345, 324]));
 
 //console.log(tree2.root.right.right.right)
 //prettyPrint(tree.root);
 //tree.insert(12, tree.root);
 //tree.insert(4, tree.root);
-tree.insert(48, tree.root);
-tree.insert(47, tree.root);
+//tree.insert(48, tree.root);
+//tree.insert(47, tree.root);
 //console.log(tree);
 //prettyPrint(tree.root);
-tree.delete(480, tree.root);
-prettyPrint(tree.root);
-tree.insert(47, tree.root);
-prettyPrint(tree.root);
-tree.delete(48, tree.root);
-prettyPrint(tree.root);
-tree.delete(23, tree.root);
-tree.delete(12, tree.root);
+//tree.delete(480, tree.root);
+//prettyPrint(tree.root);
+//tree.insert(47, tree.root);
+//prettyPrint(tree.root);
+//tree.delete(48, tree.root);
+//prettyPrint(tree.root);
+//tree.delete(23, tree.root);
+//tree.delete(12, tree.root);
 //prettyPrint(tree.root);
 //tree.insert(52, tree.root);
-prettyPrint(tree.root);
+//prettyPrint(tree.root);
 //tree.delete(67, tree.root);
-tree.delete(5, tree.root);
-prettyPrint(tree.root);
+//tree.delete(5, tree.root);
+//prettyPrint(tree.root);
 //tree.depth(6345, tree.root);
 //tree.levelOrder(tree.root);
-let inList = tree.inOrder(tree.root);
-console.log(inList)
-let preList = tree.preOrder(tree.root);
-console.log(preList);
-let postList = tree.postOrder(tree.root);
-console.log(postList);
-tree.height(324, tree.root);
-
+//let inList = tree.inOrder(tree.root);
+//console.log(inList)
+//let preList = tree.preOrder(tree.root);
+//console.log(preList);
+//let postList = tree.postOrder(tree.root);
+//console.log(postList);
+//tree.height(324, tree.root);
+//tree.height(47, tree.root);
+//tree.height(6345, tree.root);
+//tree.isBalanced(tree.root);
 
 // Had all of the below mess in the 'delete' method until figuring out the mystery
 // of 'inorder' and adding the 'deleteNode' method.
