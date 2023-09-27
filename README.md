@@ -7,6 +7,7 @@ TOP Intermediate Javascript (Binary Search Tree)
 -   level order, preorder, postorder, inorder
 -   balance check, rebalance
 
+- prettyPrint() provided by TOP to visualise tree
 
 ~ Run from terminal $/node script.js ~
 
